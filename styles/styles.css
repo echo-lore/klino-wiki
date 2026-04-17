@@ -1612,6 +1612,8 @@ body.mob-nav-open { overflow: hidden; }
 @media (min-width: 721px) {
   .hamburger { display: none !important; }
   #mobile-nav-overlay { display: none !important; }
+  /* Hide old search-bar row on desktop — replaced by icon */
+  .topbar > .search-bar { display: none !important; }
 }
 
 /* Mobile: show hamburger, hide desktop nav */
@@ -2189,12 +2191,15 @@ footer {
   #site-toc {
     display: block;
     position: fixed;
-    top: 50%;
+    top: max(80px, 10vh);
     right: max(20px, calc((100vw - 1100px) / 2 - 160px));
-    transform: translateY(-50%);
     z-index: 10;
-    width: 140px;
+    width: 148px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    scrollbar-width: none;
   }
+  #site-toc::-webkit-scrollbar { display: none; }
   .toc-inner {
     display: flex; flex-direction: column; gap: 0;
   }
@@ -2559,4 +2564,154 @@ footer {
   .rel-list { display: flex; flex-direction: column; max-width: 100%; }
   .rel-item { grid-template-columns: 1fr; display: flex; flex-direction: column; gap: 6px; }
   .rel-names { font-size: 0.90rem; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   TOPBAR ACTIONS (search icon + Аа)
+════════════════════════════════════════════════════════════ */
+.topbar-actions {
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 12px 4px 0;
+  flex-shrink: 0;
+}
+.topbar-icon-btn {
+  background: none; border: 1px solid transparent;
+  border-radius: var(--radius); cursor: pointer;
+  color: var(--text-faint);
+  font-family: var(--font-display); font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  padding: 5px 10px; min-height: 30px;
+  transition: color 0.18s, border-color 0.18s, background 0.18s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.topbar-icon-btn:hover {
+  color: var(--gold); border-color: var(--gold-dim);
+  background: var(--gold-glow);
+}
+#search-toggle-btn { font-size: 1.05rem; letter-spacing: 0; padding: 4px 10px; }
+#search-toggle-btn.active { color: var(--gold); border-color: var(--gold-dim); background: var(--gold-glow); }
+
+/* Desktop topbar layout tweak — actions on far right */
+@media (min-width: 721px) {
+  .topbar {
+    display: flex;
+    flex-direction: column;
+  }
+  .topbar > nav {
+    /* nav already has its own padding */
+  }
+  .topbar-actions {
+    position: absolute;
+    right: 0; top: 0;
+    height: 100%;
+    align-items: center;
+    background: transparent;
+    border-left: 1px solid var(--border);
+    padding: 0 12px;
+    gap: 6px;
+  }
+}
+
+/* Mobile: show hamburger, topbar-actions float right */
+@media (max-width: 720px) {
+  .topbar-actions {
+    order: 2;
+    padding: 4px 8px;
+    gap: 2px;
+  }
+  .topbar-actions #search-toggle-btn { display: none; } /* search is in overlay on mobile */
+}
+
+/* ════════════════════════════════════════════════════════════
+   SEARCH OVERLAY (desktop drop-down)
+════════════════════════════════════════════════════════════ */
+#search-overlay {
+  display: none;
+  position: sticky; top: 0;
+  /* sits right below topbar — injected before main */
+  z-index: 490;
+  background: rgba(4,3,8,0.98);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+#search-overlay.open {
+  display: block;
+  animation: searchOverlayIn 0.20s ease both;
+}
+@keyframes searchOverlayIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.search-overlay-inner {
+  display: flex; align-items: center; gap: 10px;
+  max-width: 1000px; margin: 0 auto;
+  padding: 8px max(28px, env(safe-area-inset-left));
+}
+.search-overlay-inner .search-input-wrap {
+  flex: 1; max-width: 560px; margin: 0;
+}
+.search-overlay-inner .search-count {
+  min-width: 60px;
+}
+#search-overlay-close {
+  font-size: 0.72rem; padding: 4px 9px; opacity: 0.60;
+}
+#search-overlay-close:hover { opacity: 1; }
+
+/* Move search_overlay below topbar using sibling selector trick */
+/* #search-overlay is already in DOM after .topbar, position:sticky keeps it there */
+
+/* ════════════════════════════════════════════════════════════
+   MOBILE NAV — SEARCH INPUT
+════════════════════════════════════════════════════════════ */
+.mob-nav-search {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.mob-search-wrap {
+  position: relative;
+  display: flex; align-items: center;
+}
+.mob-search-icon {
+  position: absolute; left: 12px;
+  font-size: 1rem; color: var(--text-faint);
+  pointer-events: none; line-height: 1;
+}
+#mob-search-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  color: var(--text);
+  font-family: var(--font-serif); font-style: italic; font-size: 0.92rem;
+  padding: 11px 14px 11px 38px;
+  outline: none;
+  transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+#mob-search-input::placeholder { color: var(--text-faint); font-style: italic; }
+#mob-search-input:focus {
+  border-color: var(--gold-line); background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 3px rgba(212,169,62,0.06); font-style: normal;
+}
+.mob-search-count {
+  font-family: var(--font-display); font-size: 0.54rem;
+  letter-spacing: 0.12em; color: var(--gold);
+  margin-top: 7px; min-height: 16px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   TOC — more right margin so it doesn't overlap content
+════════════════════════════════════════════════════════════ */
+@media (min-width: 1380px) {
+  #site-toc {
+    right: max(24px, calc((100vw - 1100px) / 2 - 172px));
+  }
+}
+/* Only show TOC when there's genuinely enough room */
+@media (max-width: 1379px) {
+  #site-toc { display: none !important; }
 }
