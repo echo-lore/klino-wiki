@@ -792,6 +792,59 @@ lbStage.addEventListener('touchend', e => {
   });
 })();
 
+/* ── Desktop search overlay toggle ───────────────────────── */
+(function() {
+  const toggleBtn  = document.getElementById('search-toggle-btn');
+  const closeBtn   = document.getElementById('search-overlay-close');
+  const overlay    = document.getElementById('search-overlay');
+  const input      = document.getElementById('search-input');
+  const mobInput   = document.getElementById('mob-search-input');
+  const mobCount   = document.getElementById('mob-search-count');
+  const mainCount  = document.getElementById('search-count');
+  if (!toggleBtn || !overlay) return;
+
+  function openSearch() {
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    toggleBtn.classList.add('active');
+    // Small delay for animation before focusing
+    setTimeout(() => { if (input) input.focus(); }, 60);
+  }
+  function closeSearch() {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    toggleBtn.classList.remove('active');
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    overlay.classList.contains('open') ? closeSearch() : openSearch();
+  });
+  if (closeBtn) closeBtn.addEventListener('click', closeSearch);
+
+  // Close on Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) {
+      closeSearch();
+    }
+  });
+
+  // Sync mobile search input → main search input
+  if (mobInput && input) {
+    mobInput.addEventListener('input', () => {
+      input.value = mobInput.value;
+      input.dispatchEvent(new Event('input'));
+      // Mirror count to mob count
+      if (mobCount && mainCount) mobCount.textContent = mainCount.textContent;
+    });
+    // Also keep mob input in sync when main input changes
+    input.addEventListener('input', () => {
+      if (mobCount && mainCount) {
+        setTimeout(() => { mobCount.textContent = mainCount.textContent; }, 50);
+      }
+    });
+  }
+})();
+
 /* ── Sidebar TOC active sync + progress ──────────────────── */
 (function() {
   const toc = document.getElementById('site-toc');
