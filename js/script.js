@@ -114,6 +114,15 @@ const cardData = allCards.map(card => ({
   text: card.textContent.toLowerCase()
 }));
 
+function getTopbarHeight() {
+  const topbar = document.querySelector('.topbar');
+  return topbar ? Math.ceil(topbar.getBoundingClientRect().height) : 46;
+}
+
+function getStickyOffset() {
+  return getTopbarHeight() + 8;
+}
+
 function runSearch() {
   const raw = searchInput.value;
   const q   = raw.trim().toLowerCase();
@@ -141,9 +150,7 @@ function runSearch() {
   if (shown > 0) {
     const charSection = document.getElementById('characters');
     if (charSection) {
-      const topbar = document.querySelector('.topbar');
-      const offset = topbar ? topbar.offsetHeight + 8 : 60;
-      window.scrollTo({ top: charSection.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
+      window.scrollTo({ top: charSection.getBoundingClientRect().top + window.scrollY - getStickyOffset(), behavior: 'smooth' });
     }
   }
 }
@@ -803,7 +810,12 @@ lbStage.addEventListener('touchend', e => {
   const mainCount  = document.getElementById('search-count');
   if (!toggleBtn || !overlay) return;
 
+  function syncSearchOffset() {
+    overlay.style.top = `${getTopbarHeight()}px`;
+  }
+
   function openSearch() {
+    syncSearchOffset();
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
     toggleBtn.classList.add('active');
@@ -820,6 +832,14 @@ lbStage.addEventListener('touchend', e => {
     overlay.classList.contains('open') ? closeSearch() : openSearch();
   });
   if (closeBtn) closeBtn.addEventListener('click', closeSearch);
+  window.addEventListener('resize', syncSearchOffset);
+  window.addEventListener('load', syncSearchOffset, { once: true });
+
+  overlay.querySelectorAll('.search-jump-link').forEach(link => {
+    link.addEventListener('click', () => {
+      closeSearch();
+    });
+  });
 
   // Close on Escape
   document.addEventListener('keydown', e => {
