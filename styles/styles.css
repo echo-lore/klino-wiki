@@ -1406,6 +1406,32 @@ html.font-large .upanel p { font-size: 1.04rem; }
   content: '▲'; font-size: 0.45rem; opacity: 0.60;
   transition: transform 0.28s cubic-bezier(0.22,1,0.36,1);
 }
+.char-card--collapsed {
+  grid-template-columns: 156px 1fr;
+}
+.char-card--collapsed .img-slot {
+  min-height: 0;
+  padding: 18px 12px 14px;
+  gap: 8px;
+}
+.char-card--collapsed .img-slot img,
+.char-card--collapsed .img-placeholder {
+  width: 108px;
+  height: 136px;
+}
+.char-card--collapsed .img-caption {
+  max-width: 108px;
+  font-size: 0.47rem;
+}
+.char-card--collapsed .char-info {
+  padding-bottom: 18px;
+}
+.char-card--collapsed .char-tags {
+  margin-bottom: 12px;
+}
+.char-card--collapsed .char-collapse-btn {
+  margin-top: 10px;
+}
 .char-card--collapsed .char-collapse-btn::after { transform: rotate(180deg); }
 .char-card--collapsed .char-body {
   max-height: 0; overflow: hidden;
@@ -2041,6 +2067,7 @@ footer {
 ════════════════════════════════════════════════════════════ */
 @media (max-width: 720px) {
   h3::before { display: inline; font-size: 0.65rem; opacity: 0.35; }
+  .char-card--collapsed { grid-template-columns: 1fr; }
   .char-body { max-height: none; transition: none; }
   .char-card--collapsed .char-body { max-height: 0; overflow: hidden; }
 }
