@@ -114,6 +114,22 @@ const cardData = allCards.map(card => ({
   text: card.textContent.toLowerCase()
 }));
 
+function setCharacterCardCollapsed(card, collapsed) {
+  const btn = card.querySelector('.char-collapse-btn');
+  card.classList.toggle('char-card--collapsed', collapsed);
+  if (btn) {
+    btn.textContent = collapsed ? 'Подробнее' : 'Свернуть';
+    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  }
+}
+
+function resetSearchExpandedCard(card) {
+  if (card.dataset.searchExpanded === 'true') {
+    delete card.dataset.searchExpanded;
+    setCharacterCardCollapsed(card, true);
+  }
+}
+
 function getTopbarHeight() {
   const topbar = document.querySelector('.topbar');
   return topbar ? Math.ceil(topbar.getBoundingClientRect().height) : 46;
@@ -129,7 +145,10 @@ function runSearch() {
   searchClear.classList.toggle('visible', raw.length > 0);
 
   if (!q) {
-    allCards.forEach(c => c.classList.remove('hidden'));
+    allCards.forEach(c => {
+      c.classList.remove('hidden');
+      resetSearchExpandedCard(c);
+    });
     searchCount.textContent = '';
     if (noResults) noResults.style.display = 'none';
     return;
@@ -141,7 +160,15 @@ function runSearch() {
   cardData.forEach(({ el, text }) => {
     const match = tokens.every(t => text.includes(t));
     el.classList.toggle('hidden', !match);
-    if (match) shown++;
+    if (match) {
+      if (el.classList.contains('char-card--collapsed')) {
+        el.dataset.searchExpanded = 'true';
+        setCharacterCardCollapsed(el, false);
+      }
+      shown++;
+    } else {
+      resetSearchExpandedCard(el);
+    }
   });
 
   searchCount.textContent = shown > 0 ? `${shown} из ${allCards.length}` : '';
@@ -699,13 +726,13 @@ lbStage.addEventListener('touchend', e => {
     const btn = document.createElement('button');
     btn.className = 'char-collapse-btn';
     btn.type = 'button';
-    btn.setAttribute('aria-label', 'Свернуть / развернуть');
-    btn.textContent = 'Свернуть';
+    btn.setAttribute('aria-label', 'Свернуть или развернуть карточку персонажа');
     card.querySelector('.char-info').appendChild(btn);
+    setCharacterCardCollapsed(card, true);
 
     btn.addEventListener('click', () => {
-      const collapsed = card.classList.toggle('char-card--collapsed');
-      btn.textContent = collapsed ? 'Развернуть' : 'Свернуть';
+      delete card.dataset.searchExpanded;
+      setCharacterCardCollapsed(card, !card.classList.contains('char-card--collapsed'));
     });
   });
 })();
